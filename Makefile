@@ -23,7 +23,8 @@ OBJS := \
 	$(BUILD)/isr_stubs.o \
 	$(BUILD)/exceptions.o \
 	$(BUILD)/pic.o \
-	$(BUILD)/timer.o
+	$(BUILD)/timer.o \
+	$(BUILD)/task.o
 
 all: $(KERNEL_BIN)
 
@@ -60,6 +61,9 @@ $(BUILD)/pic.o: src/pic.c | $(BUILD)
 $(BUILD)/timer.o: src/timer.c | $(BUILD)
 	$(CC) $(CFLAGS) -c $< -o $@
 
+$(BUILD)/task.o: src/task.c | $(BUILD)
+	$(CC) $(CFLAGS) -c $< -o $@
+
 $(KERNEL_BIN): $(OBJS)
 	$(LD) $(LDFLAGS) -o $@ $^
 
@@ -78,4 +82,3 @@ clean:
 	rm -rf $(BUILD) $(ISO_DIR)/boot bolgenos-core.iso
 
 .PHONY: all iso run clean
-
