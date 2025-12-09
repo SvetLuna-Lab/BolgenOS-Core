@@ -4,13 +4,21 @@
 
 #include <stdint.h>
 
-/* Глобальный счётчик тиков (увеличивается на каждый IRQ0). */
-extern volatile uint64_t timer_ticks;
+/*
+ * Глобальный счётчик тиков таймера.
+ * 32-битный счётчик более чем достаточен для учебного ядра.
+ */
+extern volatile uint32_t timer_ticks;
 
-/* Инициализация PIT: задаём частоту IRQ0 (в Гц). */
+/*
+ * Инициализация программируемого таймера PIT.
+ * frequency — желаемая частота тиков (например, 100 Гц).
+ */
 void timer_init(uint32_t frequency);
 
-/* Обработчик IRQ0 (вызывается из ASM-стаба irq0). */
+/*
+ * C-обработчик IRQ0, вызывается из ASM-стаба irq0.
+ */
 void irq0_handler(void);
 
 #endif // BOLGENOS_TIMER_H
