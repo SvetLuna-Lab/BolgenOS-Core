@@ -10,10 +10,9 @@ ISO_DIR     := iso
 BOOT_DIR    := $(ISO_DIR)/boot
 GRUB_DIR    := $(BOOT_DIR)/grub
 
-# Компилятор и линкер по умолчанию.
+# Компилятор по умолчанию.
 # При желании можно переопределить: make CC=i386-elf-gcc
 CC ?= gcc
-LD ?= $(CC)
 
 # Флаги для компиляции и линковки
 CFLAGS  := -m32 -ffreestanding -O2 -Wall -Wextra -I./src
@@ -45,9 +44,9 @@ $(BUILD_DIR)/%.o: src/%.s | $(BUILD_DIR)
 $(BUILD_DIR)/%.o: src/%.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# Линковка ядра
+# Линковка ядра (через gcc, чтобы -m32 и -lgcc работали корректно)
 $(BUILD_DIR)/kernel.elf: $(OBJECTS) linker.ld
-	$(LD) $(LDFLAGS) -o $@ $(OBJECTS) -lgcc
+	$(CC) $(LDFLAGS) -o $@ $(OBJECTS) -lgcc
 
 # Цель для ISO
 iso: $(ISO)
