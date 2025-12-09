@@ -1,17 +1,23 @@
 // src/kernel.c
 
 #include "console.h"
+#include "kprintf.h"
+#include "panic.h"
 
 void kernel_main(void) {
     console_init();
 
-    console_write("Hello from BolgenOS-Core!\n");
-    console_write("Console driver moved to console.c/.h.\n");
-    console_write("Now the kernel can use console_write() from anywhere.\n");
+    console_write("BolgenOS-Core booted.\n");
+    console_write("VGA text console initialized.\n\n");
 
-    // Пример смены цвета: светло-зелёный текст
-    console_set_attr(0x0A);
-    console_write("\n[OK] Kernel console is up.\n");
+    kprintf("Kernel greeting from %s!\n", "BolgenOS-Core");
+    kprintf("Example: decimal = %d, hex = 0x%x\n", 42, 42);
+
+    console_set_attr(0x0A); // светло-зелёный
+    console_write("\n[OK] kprintf is working.\n");
+
+    // Пример "условной паники" (закомментировано, чтобы не мешало):
+    // panic("Demo panic: nothing to do yet.");
 
     for (;;) {
         __asm__ __volatile__("hlt");
