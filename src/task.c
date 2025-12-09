@@ -12,25 +12,25 @@ static uint32_t task1_counter = 0;
  * а периодические шаги, которые вызываются по тикам таймера.
  */
 
-static void task0_step(uint64_t tick) {
+static void task0_step(uint32_t tick) {
     task0_counter++;
 
     // Раз в 50 тиков помечаем "task0" как живую
-    if (tick % 50 == 0) {
+    if (tick % 50u == 0u) {
         console_set_attr(0x0A); // светло-зелёный
         kprintf("[task0] heartbeat, tick = %u (counter = %u)\n",
-                (unsigned)tick, task0_counter);
+                (unsigned)tick, (unsigned)task0_counter);
     }
 }
 
-static void task1_step(uint64_t tick) {
+static void task1_step(uint32_t tick) {
     task1_counter++;
 
     // Раз в 120 тиков — другая задача
-    if (tick % 120 == 0) {
+    if (tick % 120u == 0u) {
         console_set_attr(0x0B); // светло-голубой
         kprintf("[task1] stats: tick = %u, loops = %u\n",
-                (unsigned)tick, task1_counter);
+                (unsigned)tick, (unsigned)task1_counter);
     }
 }
 
@@ -44,12 +44,8 @@ void tasks_init(void) {
 
 /*
  * Простенький диспетчер, вызываемый на каждый тик таймера.
- * Здесь можно добавлять новые задачи / менять частоту.
  */
-void scheduler_on_tick(uint64_t tick) {
-    // task0 — реагирует чаще
+void scheduler_on_tick(uint32_t tick) {
     task0_step(tick);
-
-    // task1 — чуть реже / по другой маске
     task1_step(tick);
 }
