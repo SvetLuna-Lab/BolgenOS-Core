@@ -16,7 +16,9 @@ KERNEL_BIN := $(BUILD)/kernel.bin
 OBJS := \
 	$(BUILD)/boot.o \
 	$(BUILD)/kernel.o \
-	$(BUILD)/console.o
+	$(BUILD)/console.o \
+	$(BUILD)/kprintf.o \
+	$(BUILD)/panic.o
 
 all: $(KERNEL_BIN)
 
@@ -30,6 +32,12 @@ $(BUILD)/kernel.o: src/kernel.c | $(BUILD)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(BUILD)/console.o: src/console.c | $(BUILD)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILD)/kprintf.o: src/kprintf.c | $(BUILD)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILD)/panic.o: src/panic.c | $(BUILD)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(KERNEL_BIN): $(OBJS)
