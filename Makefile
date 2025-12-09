@@ -18,7 +18,10 @@ OBJS := \
 	$(BUILD)/kernel.o \
 	$(BUILD)/console.o \
 	$(BUILD)/kprintf.o \
-	$(BUILD)/panic.o
+	$(BUILD)/panic.o \
+	$(BUILD)/idt.o \
+	$(BUILD)/isr_stubs.o \
+	$(BUILD)/exceptions.o
 
 all: $(KERNEL_BIN)
 
@@ -38,6 +41,15 @@ $(BUILD)/kprintf.o: src/kprintf.c | $(BUILD)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(BUILD)/panic.o: src/panic.c | $(BUILD)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILD)/idt.o: src/idt.c | $(BUILD)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILD)/isr_stubs.o: src/isr_stubs.s | $(BUILD)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILD)/exceptions.o: src/exceptions.c | $(BUILD)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(KERNEL_BIN): $(OBJS)
