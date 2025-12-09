@@ -6,6 +6,7 @@
 #include "idt.h"
 #include "pic.h"
 #include "timer.h"
+#include "task.h"
 
 void kernel_main(void) {
     console_init();
@@ -21,12 +22,15 @@ void kernel_main(void) {
     pic_remap();
     timer_init(100);  // 100 Гц → ~1 тик каждые 10 мс
 
+    kprintf("Initializing kernel tasks...\n");
+    tasks_init();
+
     kprintf("Enabling interrupts (sti).\n");
     __asm__ __volatile__("sti");
 
     console_set_attr(0x0A); // светло-зелёный
-    console_write("\n[OK] IDT + PIC + timer are active.\n");
-    console_write("[OK] Waiting for timer IRQs (tick messages)...\n\n");
+    console_write("\n[OK] IDT + PIC + timer + tasks are active.\n");
+    console_write("[OK] Waiting for timer IRQs and scheduled task output...\n\n");
 
     for (;;) {
         __asm__ __volatile__("hlt");
