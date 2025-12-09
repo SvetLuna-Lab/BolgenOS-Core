@@ -375,8 +375,10 @@ IDT loaded. Enabling interrupts (sti).
 [OK] IDT is active, interrupts enabled.
 Kernel greeting from BolgenOS-Core!
 Example: decimal = 42, hex = 0x2a
-```
 
+
+
+```
 The CPU then stays in an infinite hlt loop,
 ready for future work (timer, scheduler, etc.).
 
