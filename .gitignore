@@ -1,0 +1,19 @@
+# Build artifacts
+/build/
+/iso/boot/
+/iso/EFI/
+/iso/*.iso
+/bolgenos-core.iso
+
+# Object files, binaries
+*.o
+*.bin
+
+# Editor / OS noise
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
