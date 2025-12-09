@@ -1,10 +1,10 @@
 name: Build BolgenOS-Core ISO
 
 on:
-  workflow_dispatch:        # можно запустить руками из вкладки Actions
+  workflow_dispatch:        # запуск вручную из Actions
   push:
     tags:
-      - "v*"                # и автоматически при пуше тега v0.3.0, v0.3.1, ...
+      - "v*"                # запуск при пуше тега v0.3.0, v0.3.1, ...
 
 jobs:
   build-iso:
@@ -22,7 +22,7 @@ jobs:
       - name: Build kernel and ISO
         run: |
           make clean
-          make
+          make CC=gcc LD=ld
           make iso
           ls -lh bolgenos-core.iso
 
@@ -31,3 +31,4 @@ jobs:
         with:
           name: bolgenos-core-iso
           path: bolgenos-core.iso
+
