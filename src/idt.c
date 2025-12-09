@@ -3,13 +3,15 @@
 #include "idt.h"
 
 #include <stddef.h>
+#include <stdint.h>
 
 extern void isr0(void);  // ASM-стаб для исключения #0
+extern void irq0(void);  // ASM-стаб для IRQ0 (таймер)
 
 static idt_entry_t idt[256];
 static idt_ptr_t   idt_reg;
 
-/* Простая реализация memset, чтобы не тянуть стандартную библиотеку */
+/* Простая memset без стандартной библиотеки. */
 static void idt_memset(void* dst, uint8_t value, size_t size) {
     uint8_t* p = (uint8_t*)dst;
     for (size_t i = 0; i < size; ++i) {
@@ -32,20 +34,19 @@ static void idt_set_entry(
 }
 
 void idt_init(void) {
-    // Обнуляем всю таблицу
+    // Обнуляем таблицу
     idt_memset(idt, 0, sizeof(idt));
 
     // Настраиваем IDTR
     idt_reg.limit = (uint16_t)(sizeof(idt_entry_t) * 256 - 1);
     idt_reg.base  = (uint32_t)&idt[0];
 
-    // Регистрируем обработчик исключения #0 (деление на 0)
-    // Селектор кода: 0x08 (первый сегмент кода GDT у GRUB)
-    // Флаги: 0x8E = 10001110b
-    //  - P=1 (present)
-    //  - DPL=00 (ring 0)
-    //  - Type=1110 (32-bit interrupt gate)
+    // Исключение #0 (division by zero)
+    // селектор кода: 0x08, флаги: 0x8E (present, ring0, 32-bit interrupt gate)
     idt_set_entry(0, (uint32_t)isr0, 0x08, 0x8E);
+
+    // IRQ0 (таймер) → вектор 0x20
+    idt_set_entry(0x20, (uint32_t)irq0, 0x08, 0x8E);
 
     // Загружаем IDT
     __asm__ __volatile__("lidtl (%0)" :: "r" (&idt_reg));
