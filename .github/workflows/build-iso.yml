@@ -1,10 +1,10 @@
 name: Build BolgenOS-Core ISO
 
 on:
-  workflow_dispatch:        # запуск вручную из Actions
+  workflow_dispatch:
   push:
     tags:
-      - "v*"                # запуск при пуше тега v0.3.0, v0.3.1, ...
+      - 'v*'
 
 jobs:
   build-iso:
@@ -17,12 +17,16 @@ jobs:
       - name: Install build deps
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential grub-pc-bin xorriso
+          sudo apt-get install -y \
+            build-essential \
+            grub-pc-bin \
+            xorriso \
+            mtools
 
       - name: Build kernel and ISO
         run: |
           make clean
-          make CC=gcc LD=ld
+          make
           make iso
           ls -lh bolgenos-core.iso
 
@@ -31,4 +35,3 @@ jobs:
         with:
           name: bolgenos-core-iso
           path: bolgenos-core.iso
-
