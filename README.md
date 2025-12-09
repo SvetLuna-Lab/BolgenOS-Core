@@ -1,4 +1,5 @@
 # BolgenOS-Core – Minimal x86 Kernel Prototype
+[![build-iso](https://github.com/SvetLuna-Lab/bolgenos-core/actions/workflows/build-iso.yml/badge.svg)](https://github.com/SvetLuna-Lab/bolgenos-core/actions/workflows/build-iso.yml)
 
 **BolgenOS-Core** is a small, educational OS kernel prototype for the x86 architecture.
 
@@ -43,9 +44,9 @@ bolgenos-core/
 │  ├─ isr_stubs.s          # ASM stub for CPU exception #0 (division by zero)
 │  └─ exceptions.c         # C-level handler for exception #0 → panic()
 │
-└─ iso/
-   └─ grub/
-      └─ grub.cfg          # GRUB menu entry for the kernel
+└─ grub/
+   └─ grub.cfg             # GRUB menu entry for the kernel
+       
 ```
 
 Later additions (not yet implemented here) may include:
@@ -381,6 +382,19 @@ Example: decimal = 42, hex = 0x2a
 ```
 The CPU then stays in an infinite hlt loop,
 ready for future work (timer, scheduler, etc.).
+
+
+## Checksum (SHA-256)
+
+To verify the integrity of the ISO, compute the SHA-256 hash of `bolgenos-core.iso`:
+
+```text
+54df91f3c6f0abecc2ccebdc6647e9ca1b92499380779842bc880629c414f345
+```
+
+The hash you get (via sha256sum bolgenos-core.iso on Linux/macOS or
+Get-FileHash -Algorithm SHA256 .\bolgenos-core.iso in PowerShell) must match
+this value.
 
 
 ## 4. Educational purpose and next steps
