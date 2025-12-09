@@ -1,35 +1,48 @@
 # Changelog
 
-All notable changes to this project will be documented in this file.
+All notable changes to this project are documented here.
+Format follows a simplified semantic versioning pattern.
 
-The format is inspired by Keep a Changelog and semantic versioning,
-but kept intentionally simple for an educational hobby OS project.
+---
+
+## [0.3.0] – 2025-12-09
+
+### Added
+- **task.c/.h:** first cooperative task scheduler driven by IRQ0 ticks.
+- **io.h:** inline port I/O helpers (`inb`, `outb`).
+- **pic.c/.h:** remapping legacy PIC, unmasking IRQ0, sending EOI.
+- **timer.c/.h:** configuring PIT 8253 at 100 Hz and calling `scheduler_on_tick()`.
+- **isr_stubs.s:** new ASM stub `irq0` saving registers and returning via `iretd`.
+- **kernel.c:** initializes IDT → PIC → PIT → tasks → enables interrupts.
+- **Makefile:** added `task.o` to build sequence.
+
+### Changed
+- IDT initialization now installs vector 0x20 for IRQ0 handler.
+- Timer IRQ handler delegates control to the scheduler each tick.
+- Console messages now color-coded for task activity (green/blue/gray).
+
+### Result
+Kernel now produces real hardware interrupts, periodic ticks and two
+independent kernel tasks executing in parallel under a minimal scheduler.
 
 ---
 
 ## [0.2.0] – 2025-12-09
+*(IDT + PIC + Timer introduction)*
 
 ### Added
-- VGA text console module (`console.c/.h`) with clear, scroll and attributes
-- Minimal `kprintf` implementation (`kprintf.c/.h`) supporting %s, %c, %d, %x
-- Kernel panic facility (`panic.c/.h`) with red-screen halt
-- Interrupt Descriptor Table setup (`idt.c/.h`) and loading via `lidt`
-- ASM stub for CPU exception #0 (division by zero) in `isr_stubs.s`
-- C-level exception handler (`exceptions.c`) calling `panic()`
-- Updated kernel entry (`kernel.c`) to use console + kprintf + IDT
+- VGA text console module (`console.c/.h`)
+- Minimal `kprintf` with `%s`, `%c`, `%d`, `%x`
+- Kernel panic screen
+- IDT initialization and exception #0 handler
+- PIC remapping and IRQ0 timer support
 
 ### Changed
-- Makefile updated to build and link all new modules
-- README rewritten with detailed structure and build/run instructions
+- Makefile and README updated with build/run workflow
 
 ---
 
 ## [0.1.0] – 2025-12-08
+Initial public version — minimal Multiboot-compatible x86 kernel
+printing “Hello world” through VGA text memory.
 
-### Added
-- Initial Multiboot-compatible x86 kernel skeleton
-- `boot.s` with Multiboot header and `_start` entry point
-- `linker.ld` to place the kernel at 1 MiB
-- Simple `kernel.c` writing a string to VGA text memory
-- GRUB configuration (`iso/grub/grub.cfg`)
-- Makefile to build `kernel.bin` and bootable ISO image
