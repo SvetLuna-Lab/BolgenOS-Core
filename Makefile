@@ -15,7 +15,7 @@ GRUB_DIR    := $(BOOT_DIR)/grub
 CC ?= gcc
 
 # Флаги для компиляции и линковки
-CFLAGS  := -m32 -ffreestanding -O2 -Wall -Wextra -I./src
+CFLAGS  := -m32 -ffreestanding -fno-builtin -fno-stack-protector -O2 -Wall -Wextra -I./src
 LDFLAGS := -m32 -ffreestanding -nostdlib -T linker.ld
 
 # Источники
@@ -44,9 +44,9 @@ $(BUILD_DIR)/%.o: src/%.s | $(BUILD_DIR)
 $(BUILD_DIR)/%.o: src/%.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# Линковка ядра (через gcc, чтобы -m32 и -lgcc работали корректно)
+# Линковка ядра (через gcc; без -lgcc, чтобы не требовать 32-битный libgcc)
 $(BUILD_DIR)/kernel.elf: $(OBJECTS) linker.ld
-	$(CC) $(LDFLAGS) -o $@ $(OBJECTS) -lgcc
+	$(CC) $(LDFLAGS) -o $@ $(OBJECTS)
 
 # Цель для ISO
 iso: $(ISO)
