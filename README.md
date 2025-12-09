@@ -389,9 +389,9 @@ ready for future work (timer, scheduler, etc.).
 To verify the integrity of the ISO, compute the SHA-256 hash of `bolgenos-core.iso`:
 
 ```text
-54df91f3c6f0abecc2ccebdc6647e9ca1b92499380779842bc880629c414f345
-```
+a0f34f7549b06c31820fcf8161b0cd84c3970e594c59125ac30766a038ffa5e8
 
+```
 The hash you get (via sha256sum bolgenos-core.iso on Linux/macOS or
 Get-FileHash -Algorithm SHA256 .\bolgenos-core.iso in PowerShell) must match
 this value.
