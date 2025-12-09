@@ -1,0 +1,33 @@
+name: Build BolgenOS-Core ISO
+
+on:
+  workflow_dispatch:        # можно запустить руками из вкладки Actions
+  push:
+    tags:
+      - "v*"                # и автоматически при пуше тега v0.3.0, v0.3.1, ...
+
+jobs:
+  build-iso:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install build deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential grub-pc-bin xorriso
+
+      - name: Build kernel and ISO
+        run: |
+          make clean
+          make
+          make iso
+          ls -lh bolgenos-core.iso
+
+      - name: Upload ISO artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: bolgenos-core-iso
+          path: bolgenos-core.iso
