@@ -1,4 +1,4 @@
-# BolgenOS-Core minimal build system
+# BolgenOS-Core build system (gcc-based, no cross toolchain required)
 
 # Имя ядра и ISO
 TARGET      := bolgenos-core
@@ -11,18 +11,21 @@ BOOT_DIR    := $(ISO_DIR)/boot
 GRUB_DIR    := $(BOOT_DIR)/grub
 
 # Компилятор и линкер по умолчанию.
-# При желании можно переопределить: make CC=i386-elf-gcc LD=i386-elf-ld
+# При желании можно переопределить: make CC=i386-elf-gcc
 CC ?= gcc
-LD ?= ld
+LD ?= $(CC)
 
 # Флаги для компиляции и линковки
 CFLAGS  := -m32 -ffreestanding -O2 -Wall -Wextra -I./src
-LDFLAGS := -m elf_i386 -T linker.ld -nostdlib
+LDFLAGS := -m32 -ffreestanding -nostdlib -T linker.ld
 
-# Источники и объектные файлы
+# Источники
 C_SOURCES   := $(wildcard src/*.c)
+ASM_SOURCES := $(wildcard src/*.s)
+
+# Объектные файлы
 C_OBJECTS   := $(patsubst src/%.c,$(BUILD_DIR)/%.o,$(C_SOURCES))
-ASM_OBJECTS := $(BUILD_DIR)/boot.o
+ASM_OBJECTS := $(patsubst src/%.s,$(BUILD_DIR)/%.o,$(ASM_SOURCES))
 OBJECTS     := $(ASM_OBJECTS) $(C_OBJECTS)
 
 .PHONY: all clean iso
@@ -34,17 +37,17 @@ all: $(BUILD_DIR)/kernel.elf
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
 
-# boot.s -> boot.o
-$(BUILD_DIR)/boot.o: src/boot.s | $(BUILD_DIR)
+# Правило для *.s -> *.o
+$(BUILD_DIR)/%.o: src/%.s | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# *.c -> *.o
+# Правило для *.c -> *.o
 $(BUILD_DIR)/%.o: src/%.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # Линковка ядра
 $(BUILD_DIR)/kernel.elf: $(OBJECTS) linker.ld
-	$(LD) $(LDFLAGS) -o $@ $(OBJECTS)
+	$(LD) $(LDFLAGS) -o $@ $(OBJECTS) -lgcc
 
 # Цель для ISO
 iso: $(ISO)
