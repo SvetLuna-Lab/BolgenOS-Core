@@ -1,10 +1,9 @@
-name: Build BolgenOS-Core ISO
+name: build-iso
 
 on:
-  workflow_dispatch:
   push:
-    tags:
-      - 'v*'
+    branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   build-iso:
@@ -17,8 +16,10 @@ jobs:
       - name: Install build deps
         run: |
           sudo apt-get update
+          # Компилятор + 32-битные библиотеки и инструменты для grub-mkrescue
           sudo apt-get install -y \
             build-essential \
+            gcc-multilib \
             grub-pc-bin \
             xorriso \
             mtools
@@ -35,3 +36,4 @@ jobs:
         with:
           name: bolgenos-core-iso
           path: bolgenos-core.iso
+
