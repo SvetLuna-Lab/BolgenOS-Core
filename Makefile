@@ -1,84 +1,61 @@
-# Makefile for BolgenOS-Core
-# Minimal x86 Multiboot kernel (C + assembly)
+# BolgenOS-Core minimal build system
 
-# Cross-compiler toolchain (can be overridden from environment)
-TARGET  ?= i386-elf
-CC      := $(TARGET)-gcc
-LD      := $(TARGET)-ld
+# Имя ядра и ISO
+TARGET      := bolgenos-core
+ISO         := $(TARGET).iso
 
+# Директории
+BUILD_DIR   := build
+ISO_DIR     := iso
+BOOT_DIR    := $(ISO_DIR)/boot
+GRUB_DIR    := $(BOOT_DIR)/grub
+
+# Компилятор и линкер по умолчанию.
+# При желании можно переопределить: make CC=i386-elf-gcc LD=i386-elf-ld
+CC ?= gcc
+LD ?= ld
+
+# Флаги для компиляции и линковки
 CFLAGS  := -m32 -ffreestanding -O2 -Wall -Wextra -I./src
-LDFLAGS := -m32 -T src/linker.ld -nostdlib
+LDFLAGS := -m elf_i386 -T linker.ld -nostdlib
 
-BUILD      := build
-ISO_DIR    := iso
-KERNEL_BIN := $(BUILD)/kernel.bin
+# Источники и объектные файлы
+C_SOURCES   := $(wildcard src/*.c)
+C_OBJECTS   := $(patsubst src/%.c,$(BUILD_DIR)/%.o,$(C_SOURCES))
+ASM_OBJECTS := $(BUILD_DIR)/boot.o
+OBJECTS     := $(ASM_OBJECTS) $(C_OBJECTS)
 
-OBJS := \
-	$(BUILD)/boot.o \
-	$(BUILD)/kernel.o \
-	$(BUILD)/console.o \
-	$(BUILD)/kprintf.o \
-	$(BUILD)/panic.o \
-	$(BUILD)/idt.o \
-	$(BUILD)/isr_stubs.o \
-	$(BUILD)/exceptions.o \
-	$(BUILD)/pic.o \
-	$(BUILD)/timer.o \
-	$(BUILD)/task.o
+.PHONY: all clean iso
 
-all: $(KERNEL_BIN)
+# Сборка ядра по умолчанию
+all: $(BUILD_DIR)/kernel.elf
 
-$(BUILD):
-	mkdir -p $(BUILD)
+# Убедимся, что каталог сборки существует
+$(BUILD_DIR):
+	mkdir -p $(BUILD_DIR)
 
-$(BUILD)/boot.o: src/boot.s | $(BUILD)
+# boot.s -> boot.o
+$(BUILD_DIR)/boot.o: src/boot.s | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(BUILD)/kernel.o: src/kernel.c | $(BUILD)
+# *.c -> *.o
+$(BUILD_DIR)/%.o: src/%.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(BUILD)/console.o: src/console.c | $(BUILD)
-	$(CC) $(CFLAGS) -c $< -o $@
+# Линковка ядра
+$(BUILD_DIR)/kernel.elf: $(OBJECTS) linker.ld
+	$(LD) $(LDFLAGS) -o $@ $(OBJECTS)
 
-$(BUILD)/kprintf.o: src/kprintf.c | $(BUILD)
-	$(CC) $(CFLAGS) -c $< -o $@
+# Цель для ISO
+iso: $(ISO)
 
-$(BUILD)/panic.o: src/panic.c | $(BUILD)
-	$(CC) $(CFLAGS) -c $< -o $@
+$(ISO): $(BUILD_DIR)/kernel.elf grub/grub.cfg
+	rm -rf $(ISO_DIR)
+	mkdir -p $(GRUB_DIR)
+	cp $(BUILD_DIR)/kernel.elf $(BOOT_DIR)/kernel.elf
+	cp grub/grub.cfg $(GRUB_DIR)/grub.cfg
+	grub-mkrescue -o $(ISO) $(ISO_DIR)
 
-$(BUILD)/idt.o: src/idt.c | $(BUILD)
-	$(CC) $(CFLAGS) -c $< -o $@
-
-$(BUILD)/isr_stubs.o: src/isr_stubs.s | $(BUILD)
-	$(CC) $(CFLAGS) -c $< -o $@
-
-$(BUILD)/exceptions.o: src/exceptions.c | $(BUILD)
-	$(CC) $(CFLAGS) -c $< -o $@
-
-$(BUILD)/pic.o: src/pic.c | $(BUILD)
-	$(CC) $(CFLAGS) -c $< -o $@
-
-$(BUILD)/timer.o: src/timer.c | $(BUILD)
-	$(CC) $(CFLAGS) -c $< -o $@
-
-$(BUILD)/task.o: src/task.c | $(BUILD)
-	$(CC) $(CFLAGS) -c $< -o $@
-
-$(KERNEL_BIN): $(OBJS)
-	$(LD) $(LDFLAGS) -o $@ $^
-
-# Build bootable ISO with GRUB
-iso: $(KERNEL_BIN)
-	mkdir -p $(ISO_DIR)/boot/grub
-	cp $(KERNEL_BIN) $(ISO_DIR)/boot/kernel.bin
-	cp iso/grub/grub.cfg $(ISO_DIR)/boot/grub/grub.cfg
-	grub-mkrescue -o bolgenos-core.iso $(ISO_DIR)
-
-# Run in QEMU (if installed)
-run: iso
-	qemu-system-i386 -cdrom bolgenos-core.iso
-
+# Очистка
 clean:
-	rm -rf $(BUILD) $(ISO_DIR)/boot bolgenos-core.iso
-
-.PHONY: all iso run clean
+	rm -rf $(BUILD_DIR) $(ISO_DIR) $(ISO)
